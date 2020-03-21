@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,8 +26,9 @@ public class ImageHandler {
 
 
     public boolean writePart(ImagePart imagePart) {
+        logger.debug("Writing part: {}", imagePart);
         if (imagePart.getIndex() < 0 || imagePart.getIndex() > imagePart.getNumOfChunks()) {
-            logger.error("Incorrect data: index(%d), chunks(%d)", imagePart.getIndex(), imagePart.getNumOfChunks());
+            logger.error("Incorrect data: index({}), chunks({})", imagePart.getIndex(), imagePart.getNumOfChunks());
             return false;
         }
         if (!hasText(imagePart.getStationName())) {
@@ -44,6 +44,7 @@ public class ImageHandler {
             return false;
         }
         try (FileOutputStream fos  = new FileOutputStream(tmpFile, true)) {
+            logger.debug("Writing file content");
             fos.write(Base64.getDecoder().decode(imagePart.getData()));
         } catch (IOException e) {
             logger.error("File handling problem", e);
@@ -51,14 +52,14 @@ public class ImageHandler {
         }
         if (imagePart.getIndex() == imagePart.getNumOfChunks()) {
             File dstFile = getJpgFile(imagePart.getStationName());
-            logger.info("Moving %s to %s", tmpFile, dstFile);
+            logger.info("Moving {} to {}", tmpFile, dstFile);
             if (dstFile.exists()) {
                 logger.info("Destination file exists, removing it");
-                if (dstFile.delete())
-                    logger.error("Removing %s failed!", dstFile);
+                if (!dstFile.delete())
+                    logger.error("Removing {} failed!", dstFile);
             }
-            if (tmpFile.renameTo(dstFile)) {
-                logger.error("Moving of %s to %s failed!", tmpFile, dstFile);
+            if (!tmpFile.renameTo(dstFile)) {
+                logger.error("Moving of {} to {} failed!", tmpFile, dstFile);
             }
         }
         return true;
@@ -67,7 +68,7 @@ public class ImageHandler {
     private boolean createImagesDirectory() {
         File dir = Path.of(imagesLocation).toFile();
         if (!dir.exists()) {
-            logger.info("Creating %s directory", dir);
+            logger.info("Creating {} directory", dir);
             if (!dir.mkdir()) {
                 logger.error("Directory creation failed!");
                 return false;

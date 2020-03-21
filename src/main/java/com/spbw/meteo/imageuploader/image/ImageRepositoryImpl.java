@@ -1,18 +1,20 @@
 package com.spbw.meteo.imageuploader.image;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.spbw.meteo.imageuploader.file.ImageHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
 
 @Repository
 public class ImageRepositoryImpl implements ImageRepository {
-    Logger logger = LoggerFactory.getLogger(ImageRepositoryImpl.class);
+
+    @Autowired
+    ImageHandler imageHandler;
 
     @Override
     public boolean saveImagePart(ImagePart part) {
-        return false;
+        return null != part && imageHandler.writePart(part);
     }
 
     @Override

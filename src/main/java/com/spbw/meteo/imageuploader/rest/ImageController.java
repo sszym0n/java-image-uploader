@@ -29,15 +29,19 @@ public class ImageController {
 
     @GetMapping("/hello")
     public String helloWorld(HttpServletRequest request) {
-        logger.debug(String.format("Got request from: %s", request.getRemoteHost()));
+        logger.info("Got hello request from: {}", request.getRemoteHost());
         return applicationName;
     }
 
     @PostMapping("/json")
-    public ResponseEntity<?> uploadImage(@RequestBody ImagePart imagePart) {
+    public ResponseEntity<?> uploadImage(@RequestBody ImagePart imagePart, HttpServletRequest request) {
+        logger.info("Got JSON POST request from: {}:{}. Station: {}, part {} of {}", request.getRemoteHost(),
+                request.getRemotePort(), imagePart.getStationName(), imagePart.getIndex(), imagePart.getNumOfChunks());
         if (imageRepository.saveImagePart(imagePart)) {
+            logger.debug("Returning OK");
             return new ResponseEntity<>(HttpStatus.OK);
         }
+        logger.debug("Something went wrong, returning error");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
