@@ -2,12 +2,11 @@ package com.spbw.meteo.imageuploader.image;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
-import java.util.Base64;
 
-@Component
+@Repository
 public class ImageRepositoryImpl implements ImageRepository {
     Logger logger = LoggerFactory.getLogger(ImageRepositoryImpl.class);
 
