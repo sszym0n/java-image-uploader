@@ -10,8 +10,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -77,5 +78,25 @@ public class ImageControllerTest {
     @Test
     public void shouldReturnErrorForPut() throws Exception {
         this.mockMvc.perform(put("/json")).andDo(print()).andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void shouldReturnErrorForMissingStation() throws Exception {
+        this.mockMvc.perform(get("/image")).andDo(print()).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturnErrorForUnknownStation() throws Exception {
+        when(imageRepository.getImage(any())).thenReturn(null);
+        this.mockMvc.perform(get("/image/none")).andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("No image for station")));
+    }
+
+    @Test
+    public void shouldReturnBytesForExistingStation() throws Exception {
+        when(imageRepository.getImage("some")).thenReturn("abcdef".getBytes());
+        this.mockMvc.perform(get("/image/some")).andDo(print()).andExpect(status().isOk())
+                .andExpect(content().bytes("abcdef".getBytes()));
+        verify(imageRepository, times(1)).getImage("some");
     }
 }

@@ -2,7 +2,6 @@ package com.spbw.meteo.imageuploader.image;
 
 import com.spbw.meteo.imageuploader.file.ImageHandler;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

@@ -5,10 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.Base64;
 
@@ -63,6 +62,24 @@ public class ImageHandler {
             }
         }
         return true;
+    }
+
+    public byte[] readImage(String stationName) {
+        logger.debug("Retrieving image for station {}", stationName);
+        byte[] result = null;
+
+        if (StringUtils.hasText(stationName)) {
+            File imageFile = getJpgFile(stationName);
+            logger.debug("Look for image {}", imageFile);
+            if (imageFile.exists()) {
+                try (InputStream fis = new FileInputStream(imageFile)) {
+                    result = fis.readAllBytes();
+                } catch (IOException e) {
+                    logger.error("Error reading file", e);
+                }
+            }
+        }
+        return result;
     }
 
     private boolean createImagesDirectory() {

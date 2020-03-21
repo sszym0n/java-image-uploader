@@ -4,8 +4,6 @@ import com.spbw.meteo.imageuploader.file.ImageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.io.File;
-
 @Repository
 public class ImageRepositoryImpl implements ImageRepository {
 
@@ -18,7 +16,7 @@ public class ImageRepositoryImpl implements ImageRepository {
     }
 
     @Override
-    public File getImage(String name) {
-        return null;
+    public byte[] getImage(String stationName) {
+        return imageHandler.readImage(stationName);
     }
 }

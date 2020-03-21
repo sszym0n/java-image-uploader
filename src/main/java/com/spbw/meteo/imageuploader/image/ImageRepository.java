@@ -4,5 +4,5 @@ import java.io.File;
 
 public interface ImageRepository {
     boolean saveImagePart(ImagePart part);
-    File getImage(String name);
+    byte[] getImage(String name);
 }
