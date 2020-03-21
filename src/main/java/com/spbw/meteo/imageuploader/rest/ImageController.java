@@ -13,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
 
 @RestController
 @ConfigurationProperties
@@ -45,15 +43,18 @@ public class ImageController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/image/{station}", produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/image/{station}")
     public ResponseEntity<?> getImage(@PathVariable String station, HttpServletRequest request) {
         logger.info("Got GET request from {}:{} for station {}", request.getRemoteHost(),
                 request.getRemotePort(), station);
         byte[] bytes = imageRepository.getImage(station);
         if (bytes != null) {
-            return new ResponseEntity<>(bytes, HttpStatus.OK);
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(bytes);
         } else {
-            return new ResponseEntity<>("No image for station", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("No image for station");
         }
     }
 }

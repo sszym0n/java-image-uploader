@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
@@ -16,11 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ImageHandlerTest {
     @Autowired
     private ImageHandler imageHandler;
+
+    @MockBean
+    private TimestampHandler timestampHandler;
 
     private List<ImagePart> imageParts;
 
@@ -32,12 +38,12 @@ class ImageHandlerTest {
         imageParts.add(ImagePart.builder().index(2).numOfChunks(3).stationName("test").data("22222222").build());
         imageParts.add(ImagePart.builder().index(3).numOfChunks(3).stationName("test").data("33333333").build());
 
-        FileSystemUtils.deleteRecursively(Path.of(imageHandler.imagesLocation));
+        FileSystemUtils.deleteRecursively(Path.of(imageHandler.IMAGES_LOCATION));
     }
 
     @AfterEach
     public void tearDown() throws IOException {
-        FileSystemUtils.deleteRecursively(Path.of(imageHandler.imagesLocation));
+        FileSystemUtils.deleteRecursively(Path.of(imageHandler.IMAGES_LOCATION));
     }
 
     @Test
@@ -67,7 +73,7 @@ class ImageHandlerTest {
     @Test
     void shouldWriteFirstPart() {
         assertTrue(imageHandler.writePart(imageParts.get(0)));
-        File testFile = Path.of(imageHandler.imagesLocation, File.separator, "test.tmp").toFile();
+        File testFile = Path.of(imageHandler.IMAGES_LOCATION, File.separator, "test.tmp").toFile();
         assertTrue(testFile.exists());
         assertEquals(6, testFile.length());
     }
@@ -76,26 +82,29 @@ class ImageHandlerTest {
     void shouldWriteTwoParts() {
         assertTrue(imageHandler.writePart(imageParts.get(0)));
         assertTrue(imageHandler.writePart(imageParts.get(1)));
-        File testFile = Path.of(imageHandler.imagesLocation, File.separator, "test.tmp").toFile();
+        File testFile = Path.of(imageHandler.IMAGES_LOCATION, File.separator, "test.tmp").toFile();
         assertEquals(12, testFile.length());
     }
 
     @Test
     void shouldWriteAllParts() {
+        when(timestampHandler.addTimestamp(any())).thenReturn(true);
         assertTrue(imageHandler.writePart(imageParts.get(0)));
         assertTrue(imageHandler.writePart(imageParts.get(1)));
         assertTrue(imageHandler.writePart(imageParts.get(2)));
         assertTrue(imageHandler.writePart(imageParts.get(3)));
-        File testTempFile = Path.of(imageHandler.imagesLocation, File.separator, "test.tmp").toFile();
-        File testDestinationFile = Path.of(imageHandler.imagesLocation, File.separator, "test.jpg").toFile();
+        File testTempFile = Path.of(imageHandler.IMAGES_LOCATION, File.separator, "test.tmp").toFile();
+        File testDestinationFile = Path.of(imageHandler.IMAGES_LOCATION, File.separator, "test.jpg").toFile();
         assertFalse(testTempFile.exists());
         assertEquals(24, testDestinationFile.length());
+        verify(timestampHandler, times(1)).addTimestamp(any());
     }
 
     @Test
     void shouldWriteAllPartsWhenDestinationFileExists() throws IOException {
-        File testTempFile = Path.of(imageHandler.imagesLocation, File.separator, "test.tmp").toFile();
-        File testDestinationFile = Path.of(imageHandler.imagesLocation, File.separator, "test.jpg").toFile();
+        when(timestampHandler.addTimestamp(any())).thenReturn(true);
+        File testTempFile = Path.of(imageHandler.IMAGES_LOCATION, File.separator, "test.tmp").toFile();
+        File testDestinationFile = Path.of(imageHandler.IMAGES_LOCATION, File.separator, "test.jpg").toFile();
         createDummyFile(testDestinationFile.getName(), "dummy".getBytes());
         assertTrue(imageHandler.writePart(imageParts.get(0)));
         assertTrue(imageHandler.writePart(imageParts.get(1)));
@@ -103,6 +112,7 @@ class ImageHandlerTest {
         assertTrue(imageHandler.writePart(imageParts.get(3)));
         assertFalse(testTempFile.exists());
         assertEquals(24, testDestinationFile.length());
+        verify(timestampHandler, times(1)).addTimestamp(any());
     }
 
     @Test
@@ -124,7 +134,7 @@ class ImageHandlerTest {
     }
 
     private void createDummyFile(String fileName, byte[] bytes) throws IOException {
-        Files.createDirectory(Path.of(imageHandler.imagesLocation));
-        Files.write(Path.of(imageHandler.imagesLocation, File.separator, fileName), bytes);
+        Files.createDirectory(Path.of(imageHandler.IMAGES_LOCATION));
+        Files.write(Path.of(imageHandler.IMAGES_LOCATION, File.separator, fileName), bytes);
     }
 }

@@ -3,6 +3,7 @@ package com.spbw.meteo.imageuploader.file;
 import com.spbw.meteo.imageuploader.image.ImagePart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -15,13 +16,16 @@ import static org.springframework.util.StringUtils.hasText;
 
 @Service
 public class ImageHandler {
-    private Logger logger = LoggerFactory.getLogger(ImageHandler.class);
+    @Autowired
+    TimestampHandler timestampHandler;
 
     @Value("${spring.application.images.location}")
-    String imagesLocation;
+    String IMAGES_LOCATION;
 
-    private final String JPG_SUFFIX = ".jpg";
-    private final String TMP_SUFFIX = ".tmp";
+    private static final String JPG_SUFFIX = ".jpg";
+    private static final String TMP_SUFFIX = ".tmp";
+
+    private Logger logger = LoggerFactory.getLogger(ImageHandler.class);
 
 
     public boolean writePart(ImagePart imagePart) {
@@ -57,6 +61,9 @@ public class ImageHandler {
                 if (!dstFile.delete())
                     logger.error("Removing {} failed!", dstFile);
             }
+            if (!timestampHandler.addTimestamp(tmpFile)) {
+                logger.error("Adding timestamp to {} file failed", tmpFile);
+            }
             if (!tmpFile.renameTo(dstFile)) {
                 logger.error("Moving of {} to {} failed!", tmpFile, dstFile);
             }
@@ -83,7 +90,7 @@ public class ImageHandler {
     }
 
     private boolean createImagesDirectory() {
-        File dir = Path.of(imagesLocation).toFile();
+        File dir = Path.of(IMAGES_LOCATION).toFile();
         if (!dir.exists()) {
             logger.info("Creating {} directory", dir);
             if (!dir.mkdir()) {
@@ -95,10 +102,11 @@ public class ImageHandler {
     }
 
     private File getTempFile(String stationName) {
-        return Path.of(imagesLocation, File.separator, stationName + TMP_SUFFIX).toFile();
+        return Path.of(IMAGES_LOCATION, File.separator, stationName + TMP_SUFFIX).toFile();
     }
 
     private File getJpgFile(String stationName) {
-        return Path.of(imagesLocation, File.separator, stationName + JPG_SUFFIX).toFile();
+        return Path.of(IMAGES_LOCATION, File.separator, stationName + JPG_SUFFIX).toFile();
     }
+
 }
