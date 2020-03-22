@@ -49,7 +49,7 @@ public class ImageHandler {
         try (FileOutputStream fos  = new FileOutputStream(tmpFile, true)) {
             logger.debug("Writing file content");
             fos.write(Base64.getDecoder().decode(imagePart.getData()));
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             logger.error("File handling problem", e);
             return false;
         }
