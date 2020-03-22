@@ -9,8 +9,8 @@ group = 'com.spbw.meteo'
 version = '0.0.1'
 
 compileJava   {
-	sourceCompatibility = '1.8'
-	targetCompatibility = '1.8'
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -34,7 +34,7 @@ test {
 
 heroku {
 	appName = "spbw-image-uploader"
-	jdkVersion = 8
+	jdkVersion = 11
 	processTypes (
 			web: "java -jar build/libs/image-uploader-0.0.1.jar"
 	)
