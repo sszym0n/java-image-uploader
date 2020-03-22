@@ -1,11 +1,17 @@
 plugins {
 	id 'org.springframework.boot' version '2.2.5.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id "com.heroku.sdk.heroku-gradle" version "1.0.4"
 	id 'java'
 }
 
 group = 'com.spbw.meteo'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
+
+compileJava   {
+	sourceCompatibility = '1.8'
+	targetCompatibility = '1.8'
+}
 
 repositories {
 	mavenCentral()
@@ -25,3 +31,12 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+heroku {
+	appName = "sushi"
+	jdkVersion = 8
+	processTypes (
+			web: "java -jar build/libs/$name()-$version().jar"
+	)
+}
+
