@@ -33,10 +33,10 @@ test {
 }
 
 heroku {
-	appName = "sushi"
+	appName = "spbw-image-uploader"
 	jdkVersion = 8
 	processTypes (
-			web: "java -jar build/libs/$name()-$version().jar"
+			web: "java -jar build/libs/image-uploader-0.0.1.jar"
 	)
 }
 
