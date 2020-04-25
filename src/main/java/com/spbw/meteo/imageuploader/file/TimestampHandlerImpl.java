@@ -9,8 +9,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -30,7 +30,7 @@ public class TimestampHandlerImpl implements TimestampHandler {
     public boolean addTimestamp(File file) {
             String timestamp = DateTimeFormatter
                     .ofPattern(DATE_TIME_FORMAT)
-                    .format(LocalDateTime.now().atZone(ZoneId.of(STATION_TIMEZONE)));
+                    .format(ZonedDateTime.now(ZoneId.of(STATION_TIMEZONE)));
             logger.info("Adding timestamp {} to file {}", timestamp, file);
             try {
                 BufferedImage image = ImageIO.read(file);
